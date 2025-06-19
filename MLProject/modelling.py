@@ -6,7 +6,6 @@ import mlflow.catboost
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from catboost import CatBoostClassifier
 import matplotlib.pyplot as plt
-import seaborn as sns  # Jangan lupa impor ini
 import os
 
 # ====================
