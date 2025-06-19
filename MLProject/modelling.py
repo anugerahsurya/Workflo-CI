@@ -6,8 +6,6 @@ from catboost import CatBoostClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import argparse
 import warnings
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--border_count", type=int, default=83)
