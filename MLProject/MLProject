@@ -1,0 +1,29 @@
+name: Diabetic-Prediction
+
+conda_env: conda.yaml
+
+entry_points:
+  main:
+    parameters:
+      border_count: { type: int, default: 83 }
+      random_strength: { type: float, default: 7.853702081679818e-08 }
+      random_state: { type: int, default: 42 }
+      depth: { type: int, default: 7 }
+      learning_rate: { type: float, default: 0.09867443636192799 }
+      l2_leaf_reg: { type: float, default: 9.894379624044467 }
+      verbose: { type: int, default: 0 }
+      eval_metric: { type: string, default: "Accuracy" }
+      iterations: { type: int, default: 232 }
+      dataset: { type: string, default: "preprocessed_dataset" }
+    command: >
+      python modelling.py
+      --border_count {border_count}
+      --random_strength {random_strength}
+      --random_state {random_state}
+      --depth {depth}
+      --learning_rate {learning_rate}
+      --l2_leaf_reg {l2_leaf_reg}
+      --verbose {verbose}
+      --eval_metric {eval_metric}
+      --iterations {iterations}
+      --dataset {dataset}
