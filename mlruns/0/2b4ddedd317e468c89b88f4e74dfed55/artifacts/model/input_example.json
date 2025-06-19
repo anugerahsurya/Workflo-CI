@@ -1,1 +1,0 @@
-{"columns": ["gender", "age", "hypertension", "heart_disease", "bmi", "HbA1c_level", "blood_glucose_level", "smoking_history_No Info", "smoking_history_current", "smoking_history_ever", "smoking_history_former", "smoking_history_never", "smoking_history_not current"], "data": [[0, 36.0, 0, 0, 22.64, 6.0, 160, false, false, false, true, false, false]]}
