@@ -38,7 +38,7 @@ jobs:
             -P verbose=0 \
             -P eval_metric=Accuracy \
             -P iterations=232 \
-            -P dataset=preprocessed_dataset
+            -P dataset=preprocessing/dataset
 
       - name: Save mlruns to repo
         uses: stefanzweifel/git-auto-commit-action@v6

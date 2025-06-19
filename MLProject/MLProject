@@ -14,7 +14,7 @@ entry_points:
       verbose: { type: int, default: 0 }
       eval_metric: { type: string, default: "Accuracy" }
       iterations: { type: int, default: 232 }
-      dataset: { type: string, default: "preprocessed_dataset" }
+      dataset: { type: string, default: "preprocessing/dataset" }
     command: >
       python modelling.py
       --border_count {border_count}
