@@ -38,7 +38,6 @@ y_test = y_test.values.ravel()
 # ============================
 # Set MLflow Tracking URI
 # ============================
-mlflow.set_tracking_uri("http://127.0.0.1:5000/")
 mlflow.set_experiment("Catboost Diabetic Prediction")
 
 # ============================
