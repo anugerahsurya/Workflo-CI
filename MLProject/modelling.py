@@ -29,11 +29,8 @@ args = parser.parse_args()
 # ============================
 X_train = pd.read_csv("preprocessing/dataset/X_train.csv")
 X_test = pd.read_csv("preprocessing/dataset/X_test.csv")
-y_train = pd.read_csv("preprocessing/dataset/y_train.csv")
-y_test = pd.read_csv("preprocessing/dataset/y_test.csv")
-
-y_train = y_train.values.ravel()
-y_test = y_test.values.ravel()
+y_train = pd.read_csv("preprocessing/dataset/y_train.csv").values.ravel()
+y_test = pd.read_csv("preprocessing/dataset/y_test.csv").values.ravel()
 
 # ============================
 # Set MLflow Experiment
@@ -41,14 +38,14 @@ y_test = y_test.values.ravel()
 mlflow.set_experiment("Catboost Diabetic Prediction")
 
 # ============================
-# Run MLflow logging
+# Jalankan MLflow run
 # ============================
-
-# NOTE: Jangan pakai mlflow.start_run() kalau script ini dijalankan via `mlflow run`
+manual_run = False
 if mlflow.active_run() is None:
     mlflow.start_run(run_name="Final CatBoost Model")  # fallback untuk mode lokal
+    manual_run = True  # kita tandai bahwa run dimulai secara manual
 
-# Convert argparse args to dict
+# Konversi args ke dict
 best_params = {
     "border_count": args.border_count,
     "random_strength": args.random_strength,
@@ -61,13 +58,15 @@ best_params = {
     "iterations": args.iterations
 }
 
+# Model training
 model = CatBoostClassifier(**best_params)
 model.fit(X_train, y_train)
 
+# Prediksi
 y_pred_train = model.predict(X_train)
 y_pred_test = model.predict(X_test)
 
-# Metrics
+# Metrics function
 def classification_metrics(y_true, y_pred, prefix=""):
     return {
         f"{prefix}accuracy": accuracy_score(y_true, y_pred),
@@ -76,15 +75,15 @@ def classification_metrics(y_true, y_pred, prefix=""):
         f"{prefix}f1_score": f1_score(y_true, y_pred, average="weighted")
     }
 
+# Hitung dan log metric
 train_metrics = classification_metrics(y_train, y_pred_train, "train_")
 test_metrics = classification_metrics(y_test, y_pred_test, "test_")
 
-# Log parameters and metrics
 mlflow.log_params(best_params)
 mlflow.log_metrics(train_metrics)
 mlflow.log_metrics(test_metrics)
 
-# Save & log test metrics
+# Simpan dan log CSV metric
 test_metrics_df = pd.DataFrame({
     "metric": list(test_metrics.keys()),
     "value": list(test_metrics.values())
@@ -95,18 +94,10 @@ mlflow.log_artifact("test_classification_metrics.csv")
 # Log model
 mlflow.catboost.log_model(model, "model", input_example=X_test.iloc[:1])
 
-# Plot feature importance
+# Log feature importance
 feature_importance = model.get_feature_importance()
 feature_names = X_train.columns
 
-plt.figure(figsize=(10, 6))
-sns.barplot(x=feature_importance, y=feature_names)
-plt.title("Feature Importance - CatBoost")
-plt.xlabel("Importance Score")
-plt.tight_layout()
-plt.savefig("catboost_feature_importance.png")
-mlflow.log_artifact("catboost_feature_importance.png")
-
-# Tutup run jika dimulai secara manual
-if mlflow.active_run() is not None:
+# Tutup run hanya jika dimulai manual
+if manual_run:
     mlflow.end_run()
