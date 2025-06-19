@@ -5,8 +5,6 @@ import mlflow
 import mlflow.catboost
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from catboost import CatBoostClassifier
-import matplotlib.pyplot as plt
-import os
 
 # ====================
 # Parse CLI arguments
@@ -33,17 +31,10 @@ y_train = pd.read_csv("preprocessing/dataset/y_train.csv").values.ravel()
 y_test = pd.read_csv("preprocessing/dataset/y_test.csv").values.ravel()
 
 # ============================
-# Set MLflow Experiment
+# Set MLflow Experiment (hanya untuk mode manual)
 # ============================
-mlflow.set_experiment("Catboost Diabetic Prediction")
-
-# ============================
-# Jalankan MLflow run
-# ============================
-manual_run = False
 if mlflow.active_run() is None:
-    mlflow.start_run(run_name="Final CatBoost Model")  # fallback untuk mode lokal
-    manual_run = True  # kita tandai bahwa run dimulai secara manual
+    mlflow.set_experiment("Catboost Diabetic Prediction")
 
 # Konversi args ke dict
 best_params = {
@@ -58,15 +49,18 @@ best_params = {
     "iterations": args.iterations
 }
 
-# Model training
+# ============================
+# Train model
+# ============================
 model = CatBoostClassifier(**best_params)
 model.fit(X_train, y_train)
 
-# Prediksi
+# ============================
+# Predict and evaluate
+# ============================
 y_pred_train = model.predict(X_train)
 y_pred_test = model.predict(X_test)
 
-# Metrics function
 def classification_metrics(y_true, y_pred, prefix=""):
     return {
         f"{prefix}accuracy": accuracy_score(y_true, y_pred),
@@ -75,15 +69,17 @@ def classification_metrics(y_true, y_pred, prefix=""):
         f"{prefix}f1_score": f1_score(y_true, y_pred, average="weighted")
     }
 
-# Hitung dan log metric
 train_metrics = classification_metrics(y_train, y_pred_train, "train_")
 test_metrics = classification_metrics(y_test, y_pred_test, "test_")
 
+# ============================
+# MLflow Logging
+# ============================
 mlflow.log_params(best_params)
 mlflow.log_metrics(train_metrics)
 mlflow.log_metrics(test_metrics)
 
-# Simpan dan log CSV metric
+# Save & log test metrics
 test_metrics_df = pd.DataFrame({
     "metric": list(test_metrics.keys()),
     "value": list(test_metrics.values())
@@ -94,10 +90,6 @@ mlflow.log_artifact("test_classification_metrics.csv")
 # Log model
 mlflow.catboost.log_model(model, "model", input_example=X_test.iloc[:1])
 
-# Log feature importance
+# Feature importance
 feature_importance = model.get_feature_importance()
 feature_names = X_train.columns
-
-# Tutup run hanya jika dimulai manual
-if manual_run:
-    mlflow.end_run()
